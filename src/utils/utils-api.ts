@@ -1,7 +1,12 @@
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 import queryString from 'query-string';
 import { supabase } from './utils-supabase';
 
 // ==================== TYPES ====================
+
+export type ApiResponse<T = any> =
+  | { status: 'success'; data: T; message?: string }
+  | { status: 'error'; message: string; data: null };
 
 type AuthContext = {
   accessToken: string;
@@ -9,8 +14,9 @@ type AuthContext = {
 };
 
 // ==================== GET AUTH CONTEXT ====================
+
 async function getAuthContext(): Promise<
-  { auth: AuthContext; error: null } | { auth: null; error: any }
+  { auth: AuthContext; error: null } | { auth: null; error: ApiResponse<never> }
 > {
   const {
     data: { session },
@@ -48,115 +54,116 @@ async function getAuthContext(): Promise<
   };
 }
 
-// ==================== API REQUEST HELPER ====================
-type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  body?: any;
-  params?: Record<string, any>;
-  headers?: Record<string, string>;
+// ==================== AXIOS INSTANCE ====================
+
+const createAxiosInstance = async (): Promise<AxiosInstance | null> => {
+  const { auth, error } = await getAuthContext();
+
+  if (error || !auth) {
+    return null;
+  }
+
+  const instance = axios.create({
+    baseURL: auth.apiUrl,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${auth.accessToken}`,
+    },
+    paramsSerializer: {
+      serialize: params =>
+        queryString.stringify(params, {
+          skipNull: false,
+          skipEmptyString: true,
+        }),
+    },
+    maxRedirects: 0,
+    adapter: ['fetch', 'xhr', 'http'],
+  });
+
+  // Response interceptor for error handling
+  instance.interceptors.response.use(
+    response => response,
+    async (error: AxiosError) => {
+      const originalRequest = error.config as AxiosRequestConfig & {
+        _retry?: boolean;
+      };
+
+      // Handle 401 - refresh session and retry
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          const {
+            data: { session },
+            error: refreshError,
+          } = await supabase.auth.refreshSession();
+
+          if (refreshError || !session) {
+            await supabase.auth.signOut();
+            window.location.href = '/login';
+            return Promise.reject(error);
+          }
+
+          // Update authorization header with new token
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
+          }
+
+          return instance(originalRequest);
+        } catch (refreshError) {
+          await supabase.auth.signOut();
+          window.location.href = '/login';
+          return Promise.reject(refreshError);
+        }
+      }
+
+      return Promise.reject(error);
+    },
+  );
+
+  return instance;
 };
+
+// ==================== API REQUEST HELPER ====================
 
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestOptions = {},
-): Promise<any> {
-  const { auth, error: authError } = await getAuthContext();
-
-  if (authError) {
-    return authError as any;
-  }
-
-  const { method = 'GET', body, params, headers = {} } = options;
-
-  // Build URL with query params
-  let url = `${auth?.apiUrl}${endpoint}`;
-  if (params) {
-    const queryStr = queryString.stringify(params, {
-      skipNull: true,
-      skipEmptyString: true,
-    });
-    if (queryStr) url += `?${queryStr}`;
-  }
-
+  config: AxiosRequestConfig = {},
+): Promise<ApiResponse<T>> {
   try {
-    // Create default headers and merge any custom ones
-    const headers = new Headers(options.headers);
-    if (auth?.accessToken)
-      headers.set('Authorization', `Bearer ${auth?.accessToken}`);
+    const axiosInstance = await createAxiosInstance();
 
-    // Automatically set Content-Type for non-FormData bodies
-    if (options.body && !(options.body instanceof FormData)) {
-      headers.set('Content-Type', 'application/json');
-    }
-
-    const response = await fetch(url, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-      redirect: 'manual',
-    });
-
-    // Handle 401 - refresh session and retry
-    if (response.status === 401) {
-      const {
-        data: { session },
-        error: refreshError,
-      } = await supabase.auth.refreshSession();
-
-      if (refreshError || !session) {
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-        return {
-          status: 'error',
-          message: 'Session expired. Please sign in again.',
-          data: null,
-        };
-      }
-
-      // Retry with new token
-      const retryResponse = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-          ...headers,
-        },
-        body: body ? JSON.stringify(body) : undefined,
-      });
-
-      const retryData = await retryResponse.json();
-
-      if (!retryResponse.ok) {
-        return {
-          status: 'error',
-          message: retryData.message || 'Request failed',
-          data: null,
-        };
-      }
-
-      return {
-        status: 'success',
-        data: retryData.data || retryData,
-      };
-    }
-
-    const data = await response.json();
-
-    if (!response.ok) {
+    if (!axiosInstance) {
       return {
         status: 'error',
-        message:
-          data.message || `Request failed with status ${response.status}`,
+        message: 'Authentication required. Please sign in.',
         data: null,
       };
     }
 
+    const response = await axiosInstance.request<any>({
+      url: endpoint,
+      ...config,
+    });
+
     return {
       status: 'success',
-      data: data.data || data,
+      data: response.data.data || response.data,
     };
   } catch (error) {
-    console.error('API request error:', error);
+    if (axios.isAxiosError(error)) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        'An unexpected error occurred';
+
+      return {
+        status: 'error',
+        message,
+        data: null,
+      };
+    }
+
     return {
       status: 'error',
       message:
@@ -167,20 +174,21 @@ async function apiRequest<T>(
 }
 
 // ==================== CONVENIENCE METHODS ====================
+
 export const api = {
-  get: <T extends any>(endpoint: string, params?: Record<string, any>) =>
+  get: <T = any>(endpoint: string, params?: Record<string, any>) =>
     apiRequest<T>(endpoint, { method: 'GET', params }),
 
-  post: <T extends any>(endpoint: string, body?: any) =>
-    apiRequest<T>(endpoint, { method: 'POST', body }),
+  post: <T = any>(endpoint: string, data?: any) =>
+    apiRequest<T>(endpoint, { method: 'POST', data }),
 
-  put: <T extends any>(endpoint: string, body?: any) =>
-    apiRequest<T>(endpoint, { method: 'PUT', body }),
+  put: <T = any>(endpoint: string, data?: any) =>
+    apiRequest<T>(endpoint, { method: 'PUT', data }),
 
-  patch: <T extends any>(endpoint: string, body?: any) =>
-    apiRequest<T>(endpoint, { method: 'PATCH', body }),
+  patch: <T = any>(endpoint: string, data?: any) =>
+    apiRequest<T>(endpoint, { method: 'PATCH', data }),
 
-  delete: <T extends any>(endpoint: string) =>
+  delete: <T = any>(endpoint: string) =>
     apiRequest<T>(endpoint, { method: 'DELETE' }),
 };
 
