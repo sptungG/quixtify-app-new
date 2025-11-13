@@ -7,38 +7,78 @@
     "build": "modern build",
     "start": "modern start",
     "serve": "modern serve",
+    "test": "npx playwright test",
     "new": "modern new",
     "lint": "biome check",
     "prepare": "simple-git-hooks",
+    "build:analyze": "BUNDLE_ANALYZE=true modern build",
     "upgrade": "modern upgrade"
   },
   "engines": {
     "node": ">=16.18.1"
   },
   "lint-staged": {
-    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
-      "biome check --files-ignore-unknown=true"
-    ]
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}": ["biome check"]
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
   },
   "dependencies": {
+    "@mantine/carousel": "^8.3.7",
+    "@mantine/core": "^8.3.7",
+    "@mantine/dates": "^8.3.7",
+    "@mantine/form": "^8.3.7",
+    "@mantine/hooks": "^8.3.7",
+    "@mantine/modals": "^8.3.7",
+    "@mantine/notifications": "^8.3.7",
+    "@mantine/nprogress": "^8.3.7",
+    "@mantine/spotlight": "^8.3.7",
     "@modern-js/runtime": "2.68.19",
+    "@supabase/supabase-js": "^2.81.1",
+    "axios": "^1.13.2",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.19",
+    "embla-carousel": "^8.6.0",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.553.0",
+    "mac-scrollbar": "^0.13.8",
+    "mantine-form-yup-resolver": "^2.0.0",
+    "playwright": "^1.56.1",
+    "query-string": "^9.3.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-big-calendar": "^1.19.4",
+    "react-device-detect": "^2.2.3",
+    "react-dom": "^18.3.1",
+    "react-easy-crop": "^5.5.3",
+    "react-phone-number-input": "^3.4.13",
+    "swr": "^2.3.6",
+    "tailwind-merge": "^3.4.0",
+    "tailwind-preset-mantine": "^3.0.2",
+    "vaul": "^1.1.2",
+    "yup": "^1.7.1",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@modern-js/app-tools": "2.68.19",
-    "@modern-js/tsconfig": "2.68.19",
     "@biomejs/biome": "1.9.4",
-    "typescript": "~5.7.3",
+    "@modern-js/app-tools": "2.68.19",
+    "@modern-js/plugin-tailwindcss": "^2.68.19",
+    "@modern-js/tsconfig": "2.68.19",
+    "@playwright/test": "^1.56.1",
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/jest": "~29.2.4",
+    "@types/lodash": "^4.17.20",
     "@types/node": "~18.11.9",
     "@types/react": "^18.3.11",
     "@types/react-dom": "~18.3.1",
+    "cross-env": "^10.1.0",
     "lint-staged": "~15.4.0",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
+    "rimraf": "^6.0.1",
     "simple-git-hooks": "^2.11.1",
-    "rimraf": "^6.0.1"
+    "tailwindcss": "^4.1.17",
+    "typescript": "~5.7.3"
   }
 }

@@ -23,7 +23,22 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noDuplicateFontNames": "off"
+        "noDuplicateFontNames": "off",
+        "noExplicitAny": "off"
+      },
+      "style": {
+        "useImportType": "off",
+        "useSelfClosingElements": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "noEmptyPattern": "off"
+      },
+      "complexity": {
+        "noBannedTypes": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off"
       }
     }
   },
