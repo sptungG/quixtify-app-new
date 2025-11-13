@@ -1,5 +1,9 @@
-'use client';
-
+import { Logo02Svg } from '@/components/icons/LogoSvg';
+import useTranslation from '@/hooks/useTranslation';
+import { regexEmail } from '@/utils/utils';
+import { notifyError, notifySuccess } from '@/utils/utils-mantine';
+import { supabase } from '@/utils/utils-supabase';
+import Yup, { passwordSchema } from '@/utils/utils-yup';
 import {
   Anchor,
   Button,
@@ -15,27 +19,9 @@ import { Link, useNavigate } from '@modern-js/runtime/router';
 import { yupResolver } from 'mantine-form-yup-resolver';
 import React, { useState } from 'react';
 
-import { Logo02Svg } from '@/components/icons/LogoSvg';
-import { regexEmail } from '@/utils/utils';
-import Yup, { passwordSchema } from '@/utils/utils-yup';
-
-import useTranslation from '@/hooks/useTranslation';
-import { notifyError, notifySuccess } from '@/utils/utils-mantine';
-import { supabase } from '@/utils/utils-supabase';
+// ====================
 
 type TLoginPageProps = { children?: React.ReactNode };
-
-const Schema = Yup.object({
-  email: Yup.string()
-    .trim()
-    .matches(regexEmail, 'Invalid email')
-    .required('Email is required'),
-  password: Yup.string()
-    .trim()
-    .min(8, 'Password must be at least 8 characters')
-    .concat(passwordSchema)
-    .required('Password is required'),
-});
 
 const LoginPage = ({ children }: TLoginPageProps) => {
   const uid = useId();
@@ -194,5 +180,19 @@ const LoginPage = ({ children }: TLoginPageProps) => {
     </div>
   );
 };
+
+// ====================
+
+const Schema = Yup.object({
+  email: Yup.string()
+    .trim()
+    .matches(regexEmail, 'Invalid email')
+    .required('Email is required'),
+  password: Yup.string()
+    .trim()
+    .min(8, 'Password must be at least 8 characters')
+    .concat(passwordSchema)
+    .required('Password is required'),
+});
 
 export default LoginPage;

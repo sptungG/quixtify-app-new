@@ -1,5 +1,3 @@
-'use client';
-
 // import { UseQueryResult } from '@tanstack/react-query';
 // import { User } from 'firebase/auth';
 import { pick } from 'lodash';

@@ -1,7 +1,4 @@
-'use client';
-
 import { LogoText01Svg } from '@/components/icons/LogoTextSvg';
-// import Version from '@/components/ui-layout/Version';
 import useTranslation from '@/hooks/useTranslation';
 import { IMAGE_PATHNAME } from '@/utils/constants';
 import { cn, regexEmail } from '@/utils/utils';
