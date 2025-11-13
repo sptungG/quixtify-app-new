@@ -1,6 +1,6 @@
 // import { useTranslation as useNTranslation } from "react-i18next";
 
-import { useAppStore } from '@/contexts/AppContext';
+import { useAppStore } from '@/components/contexts/AppContext';
 // import en from "@/i18n/en.json";
 
 function useTranslation() {

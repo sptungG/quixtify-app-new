@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppContext } from '@/components/contexts/AppContext';
 
 import { Navigate, useLocation } from '@modern-js/runtime/router';
 import { LoadingScreen } from '../results/Loading';

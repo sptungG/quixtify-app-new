@@ -1,4 +1,4 @@
-import { AppProvider } from '@/contexts/AppContext';
+import { AppProvider } from '@/components/contexts/AppContext';
 import { Notifications } from '@mantine/notifications';
 import { NavigationProgress } from '@mantine/nprogress';
 import React from 'react';
