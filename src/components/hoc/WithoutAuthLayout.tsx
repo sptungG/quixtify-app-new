@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useAppContext } from '@/components/contexts/AppContext';
+import { useAppContext } from '@/contexts/AppContext';
 import { getCallbackUrl } from '@/utils/utils';
 
 import { useDateTz } from '@/hooks/useDateTz';

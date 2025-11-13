@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { useAppContext } from '@/components/contexts/AppContext';
+import { useAppContext } from '@/contexts/AppContext';
 import { CurrentTimeZone, findTimeZoneValid } from '@/utils/constants';
 import { dayjs, parseDate } from '@/utils/utils-date';
 
