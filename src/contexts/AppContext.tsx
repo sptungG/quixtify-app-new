@@ -16,10 +16,6 @@ import { createContext, memo, useContext, useEffect, useMemo } from 'react';
 import InitApp from '@/components/init/InitApp';
 import { useAppStore as useAppStoreHook } from './app-store';
 
-// const InitApp = dynamic(() => import('@/components/ui-layout/InitApp'), {
-//   ssr: false,
-//   loading: () => <LoadingScreen className="fixed inset-0" />,
-// });
 // const InitOneSignal = dynamic(() => import("@/components/ui-layout/InitOneSignal"), { ssr: false });
 
 const AppContext = createContext<TContextValues>({} as any);

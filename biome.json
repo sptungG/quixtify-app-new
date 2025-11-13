@@ -28,6 +28,7 @@
       },
       "style": {
         "useImportType": "off",
+        "noUnusedTemplateLiteral": "off",
         "useSelfClosingElements": "off"
       },
       "correctness": {
@@ -35,7 +36,8 @@
         "noEmptyPattern": "off"
       },
       "complexity": {
-        "noBannedTypes": "off"
+        "noBannedTypes": "off",
+        "noUselessTypeConstraint": "off"
       },
       "a11y": {
         "noSvgWithoutTitle": "off"
