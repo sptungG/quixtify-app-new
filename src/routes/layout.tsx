@@ -1,11 +1,12 @@
 import Providers from '@/components/providers/Providers';
 import { ColorSchemeScript } from '@mantine/core';
+import { Helmet } from '@modern-js/runtime/head';
 import { Outlet } from '@modern-js/runtime/router';
 
 import './index.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/carousel/styles.css';
-import { Helmet } from '@modern-js/runtime/head';
+import '@mantine/nprogress/styles.css';
 
 export default function Layout() {
   return (

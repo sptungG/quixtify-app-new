@@ -1,5 +1,6 @@
 import { AppProvider } from '@/contexts/AppContext';
 import { Notifications } from '@mantine/notifications';
+import { NavigationProgress } from '@mantine/nprogress';
 import React from 'react';
 import MantineProvider from './MantineProvider';
 
@@ -10,6 +11,7 @@ const Providers = ({ children }: TProvidersProps) => {
     <MantineProvider>
       <AppProvider>{children}</AppProvider>
       <Notifications position="top-center" />
+      <NavigationProgress />
     </MantineProvider>
   );
 };
