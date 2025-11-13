@@ -39,15 +39,15 @@ export interface TApiClient {
   create(
     params?: TFindClientPayload,
     payload?: TCreateClientPayload,
-  ): Promise<TClientEntity>;
+  ): Promise<any>;
   update(
     params?: TFindClientPayload,
     payload?: TUpdateClientPayload,
-  ): Promise<TClientEntity>;
+  ): Promise<any>;
   updatePartial(
     params?: TFindClientPayload,
     payload?: TUpdateClientPayload,
-  ): Promise<TClientEntity>;
+  ): Promise<any>;
   delete(params?: TFindClientPayload): Promise<any>;
 }
 

@@ -129,7 +129,7 @@ const createAxiosInstance = async (): Promise<AxiosInstance | null> => {
 async function apiRequest<T>(
   endpoint: string,
   config: AxiosRequestConfig = {},
-): Promise<ApiResponse<T>> {
+): Promise<any> {
   try {
     const axiosInstance = await createAxiosInstance();
 

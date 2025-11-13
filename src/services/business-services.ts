@@ -86,13 +86,13 @@ export interface TApiBusiness {
   // Core CRUD operations
   findAll(): Promise<TBusinessEntity[]>;
   findById(payload: string): Promise<TBusinessEntity>;
-  create(payload: TCreateBusinessPayload): Promise<TBusinessEntity>;
-  update(id: string, payload: TUpdateBusinessPayload): Promise<TBusinessEntity>;
+  create(payload: TCreateBusinessPayload): Promise<any>;
+  update(id: string, payload: TUpdateBusinessPayload): Promise<any>;
   updatePartial(
     id: string,
     payload: TUpdateBusinessPayload,
     options?: any,
-  ): Promise<TBusinessEntity>;
+  ): Promise<any>;
   delete(payload: string): Promise<any>;
 
   // Subscription & Billing operations
@@ -106,9 +106,7 @@ export interface TApiBusiness {
   getBillingPortal(
     params: TGetBillingPortalBusinessPayload,
   ): Promise<TGetBillingPortalBusinessResult>;
-  downgradePlan(
-    params: TGetBillingPortalBusinessPayload,
-  ): Promise<TGetBillingPortalBusinessResult>;
+  downgradePlan(params: TGetBillingPortalBusinessPayload): Promise<any>;
 
   // Gallery operations
   reorderGallery(
