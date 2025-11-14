@@ -29,7 +29,7 @@ import {
   createGetHook,
   createMutationHook,
   createParamsMutationHook,
-} from './useSWRFactory';
+} from './useSWRSet';
 
 // ==================== BUSINESS HOOKS (GET) ====================
 
@@ -209,22 +209,3 @@ export const useMutateDeleteStaff = () =>
 
 export const useMutateDeleteUser = () =>
   createMutationHook<any, TFindUser>('/users', arg => ApiUser.delete(arg));
-
-// ==================== REVALIDATION HELPERS ====================
-
-type TParams = {
-  id?: string;
-  business?: string;
-};
-
-export const revalidateKeys = {
-  // Business
-  business: (id: string) => `/businesses/${id}`,
-  plans: () => '/plans',
-  gallery: (p: TParams) => buildPath(`/businesses/gallery`, p),
-  //
-  clients: (p: TParams) => buildPath(`/businesses/clients`, p),
-  staffs: (p: TParams) => buildPath(`/businesses/staff`, p),
-  // User
-  currentUser: () => '/users/me',
-};

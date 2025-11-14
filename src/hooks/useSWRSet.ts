@@ -2,6 +2,8 @@ import { AxiosRequestConfig } from 'axios';
 import useSWR, { Fetcher, SWRConfiguration } from 'swr';
 import useSWRMutation, { SWRMutationConfiguration } from 'swr/mutation';
 
+// ====================
+
 export function buildPath<T extends Record<string, any>>(
   basePath: string,
   params?: T,
@@ -19,6 +21,25 @@ export function buildPath<T extends Record<string, any>>(
 
   return null;
 }
+
+// ==================== REVALIDATION HELPERS ====================
+
+type TParams = {
+  id?: string;
+  business?: string;
+};
+
+export const revalidateKeys = {
+  // Business
+  business: (id: string) => `/businesses/${id}`,
+  plans: () => '/plans',
+  gallery: (p: TParams) => buildPath(`/businesses/gallery`, p),
+  //
+  clients: (p: TParams) => buildPath(`/businesses/clients`, p),
+  staffs: (p: TParams) => buildPath(`/businesses/staff`, p),
+  // User
+  currentUser: () => '/users/me',
+};
 
 /**
  * Generic GET hook factory
