@@ -91,8 +91,8 @@ export const AppProvider = ({ children }: React.PropsWithChildren) => {
   const data: TContextValues = {
     // fUser: fUser as any,
     currentUserDataStaff: currentUserDataStaff,
-    currentBusiness: pick(currentBusinessReq, ['data', 'isLoading']),
-    currentUser: pick(currentUserReq, ['data', 'isLoading']),
+    currentBusiness: pick(currentBusinessReq, ['data', 'isLoading', 'mutate']),
+    currentUser: pick(currentUserReq, ['data', 'isLoading', 'mutate']),
     calendarConfigs: calendarConfigs || INITIAL_CALENDAR_CONFIGS,
   };
   return (
