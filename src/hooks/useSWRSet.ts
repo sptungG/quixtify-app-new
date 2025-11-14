@@ -1,4 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
+import { get, omit } from 'lodash';
 import useSWR, { Fetcher, SWRConfiguration } from 'swr';
 import useSWRMutation, { SWRMutationConfiguration } from 'swr/mutation';
 
@@ -9,17 +10,18 @@ export function buildPath<T extends Record<string, any>>(
   params?: T,
   requiredKeys?: (keyof T)[],
 ): string | null {
-  // Check if all required keys exist and are truthy
-  if (params && requiredKeys) {
-    const allKeysExist = requiredKeys.every(key => params[key]);
-
-    if (allKeysExist) {
-      const pathParts = [basePath, ...requiredKeys.map(key => params[key])];
-      return pathParts.join('/');
-    }
+  if (requiredKeys) {
+    const allKeysExist = requiredKeys?.every(key => get(params, key));
+    if (!allKeysExist) return null;
   }
-
-  return null;
+  const pathKeys = ['business', 'id'];
+  const rest = requiredKeys ? undefined : omit(params, pathKeys);
+  const pathParts = [
+    basePath,
+    ...pathKeys.map(key => get(params, key)),
+    !!rest && JSON.stringify(rest),
+  ].filter(Boolean);
+  return pathParts.join('/');
 }
 
 // ==================== REVALIDATION HELPERS ====================
