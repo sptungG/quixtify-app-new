@@ -6,15 +6,6 @@ import { supabase } from './utils-supabase';
 
 // ==================== GET AUTH CONTEXT ====================
 
-export type TApiResponse<T = any> =
-  | { status: 'success'; data: T; message?: string }
-  | { status: 'error'; message: string; data: null };
-
-type AuthContext = {
-  accessToken: string;
-  apiUrl: string;
-};
-
 async function getAuthContext() {
   const { data, error } = await supabase.auth.getSession();
 
