@@ -15,70 +15,50 @@ type AuthContext = {
   apiUrl: string;
 };
 
-async function getAuthContext(): Promise<
-  | { auth: AuthContext; error: null }
-  | { auth: null; error: TApiResponse<never> }
-> {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
+async function getAuthContext() {
+  const { data, error } = await supabase.auth.getSession();
 
-  if (error || !session) {
+  if (error || !data?.session) {
     console.error('Auth error:', error?.message || 'No session');
     return {
-      auth: null,
-      error: {
-        status: 'error',
-        message: 'Authentication required. Please sign in.',
-        data: null,
-      },
-    };
-  }
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-
-  if (!apiUrl) {
-    return {
-      auth: null,
-      error: {
-        status: 'error',
-        message: 'API URL not configured',
-        data: null,
-      },
+      status: 'error',
+      message: 'Authentication required. Please sign in.',
+      data: null,
+      error,
     };
   }
 
   return {
-    auth: { accessToken: session.access_token, apiUrl },
-    error: null,
+    status: 'success',
+    data,
+    error,
   };
 }
 
 // ==================== AXIOS INSTANCE ====================
 
 const createAxiosInstance = async (): Promise<AxiosInstance | null> => {
-  const { auth, error } = await getAuthContext();
+  const { data, error } = await getAuthContext();
 
-  if (error || !auth) {
-    return null;
-  }
+  if (error || !data?.session) return null;
 
   const instance = axios.create({
-    baseURL: auth.apiUrl,
+    baseURL: process.env.MODERN_API_URL || '',
     maxRedirects: 0,
     adapter: ['fetch', 'xhr', 'http'],
   });
 
+  const accessToken = data?.session?.access_token;
+
   instance.interceptors.request.use(
     async config => {
       try {
-        const headers = new Headers(config.headers);
-        if (auth?.accessToken)
-          headers.set('Authorization', `Bearer ${auth?.accessToken}`);
-        // Automatically set Content-Type for non-FormData bodies
+        if (accessToken) {
+          // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+          config.headers['Authorization'] = `Bearer ${accessToken}`;
+        }
         if (config.data && !(config.data instanceof FormData)) {
-          headers.set('Content-Type', 'application/json');
+          config.headers['Content-Type'] = 'application/json';
         }
         return config;
       } catch (error) {

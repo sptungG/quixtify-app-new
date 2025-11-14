@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "reset": "npx rimraf node_modules ./**/node_modules",
-    "dev": "modern dev",
+    "dev": "PORT=3000 modern dev",
     "build": "modern build",
     "start": "modern start",
     "serve": "modern serve",

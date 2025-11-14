@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import { memoryStorage } from './utils-instorage';
+import { MemoryStorage, SecureStorage } from './utils-instorage';
 
 const isBrowser =
   typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
-const storageProvider = () => (isBrowser ? localStorage : memoryStorage);
+const secureStorage = isBrowser ? new SecureStorage() : new MemoryStorage();
 
 export const supabase = createClient<any>(
   String(process.env.MODERN_SUPABASE_URL),
@@ -13,7 +13,7 @@ export const supabase = createClient<any>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      storage: storageProvider(),
+      storage: secureStorage,
     },
   },
 );

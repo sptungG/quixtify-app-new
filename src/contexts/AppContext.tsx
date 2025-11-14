@@ -12,6 +12,14 @@ import { createContext, memo, useContext, useEffect, useMemo } from 'react';
 // import { TUserEntity } from '@/modules/users/types/user-type';
 
 import InitApp from '@/components/init/InitApp';
+import { useGetBusinessById, useGetCurrentUser } from '@/hooks/useSWRCombined';
+import {
+  ApiUser,
+  TBusinessEntity,
+  TStaffEntity,
+  TUserEntity,
+} from '@/services';
+import useSWR, { SWRResponse } from 'swr';
 import { useAppStore as useAppStoreHook } from './app-store';
 
 // const InitOneSignal = dynamic(() => import("@/components/ui-layout/InitOneSignal"), { ssr: false });
@@ -42,62 +50,50 @@ export const AppProvider = ({ children }: React.PropsWithChildren) => {
   // const fUser0 = useAppStoreHook(s => s.fUser);
   // const fUser = parsedFUser(fUser0) as any;
 
-  // const currentUserReq = useFindCurrentUser();
-  // const currentUserData = currentUserReq.data;
-  // const currentUserStaffs = currentUserData?.staffs || [];
-  // const currentUserDataStaff = useMemo(() => {
-  //   const foundItem0 = currentUserStaffs?.[0];
-  //   const foundItem1 = currentUserStaffs?.find(e => e?.id === selectedStaff);
-  //   return selectedStaff
-  //     ? {
-  //         ...foundItem1,
-  //         email: foundItem1?.email || currentUserData?.email || fUser?.email,
-  //       }
-  //     : (currentUserStaffs?.length < 2 &&
-  //         foundItem0 && {
-  //           ...(foundItem0 || {}),
-  //           email: foundItem0?.email || currentUserData?.email || fUser?.email,
-  //         }) ||
-  //         ({} as TStaffEntity);
-  // }, [JSON.stringify(currentUserData), selectedStaff]);
+  const currentUserReq = useGetCurrentUser();
+  const currentUserData = currentUserReq.data;
+  const currentUserStaffs = currentUserData?.staffs || [];
+  const currentUserDataStaff = useMemo(() => {
+    const foundItem0 = currentUserStaffs?.[0];
+    const foundItem1 = currentUserStaffs?.find(e => e?.id === selectedStaff);
+    return selectedStaff
+      ? {
+          ...foundItem1,
+          email: foundItem1?.email || currentUserData?.email,
+        }
+      : (currentUserStaffs?.length < 2 &&
+          foundItem0 && {
+            ...(foundItem0 || {}),
+            email: foundItem0?.email || currentUserData?.email,
+          }) ||
+          ({} as TStaffEntity);
+  }, [JSON.stringify(currentUserData), selectedStaff]);
 
   // const isRole_O =
   //   String(currentUserDataStaff?.role) === String(TERoles.ROLE_OWNER);
 
-  // const currentBusinessReq = useFindBusinessById(
-  //   currentUserDataStaff?.business?.id || '',
-  // );
+  const currentBusinessReq = useGetBusinessById(
+    currentUserDataStaff?.business?.id || '',
+  );
 
-  // const calendarConfigs = (
-  //   currentBusinessReq.data?.id
-  //     ? pick(currentBusinessReq.data, [
-  //         'calendar_interval',
-  //         'calendar_slot_size',
-  //         'calendar_day_start_at',
-  //         'calendar_week_starts_on',
-  //       ])
-  //     : INITIAL_CALENDAR_CONFIGS
-  // ) as TCalendarConfigs;
+  const calendarConfigs = (
+    currentBusinessReq.data?.id
+      ? pick(currentBusinessReq.data, [
+          'calendar_interval',
+          'calendar_slot_size',
+          'calendar_day_start_at',
+          'calendar_week_starts_on',
+        ])
+      : INITIAL_CALENDAR_CONFIGS
+  ) as TCalendarConfigs;
 
   // -----------------------------------------------------
   const data: TContextValues = {
     // fUser: fUser as any,
-    // currentUserDataStaff: currentUserDataStaff,
-    // currentBusiness: pick(currentBusinessReq, [
-    //   'data',
-    //   'isFetching',
-    //   'refetch',
-    //   'isLoading',
-    //   'error',
-    // ]),
-    // currentUser: pick(currentUserReq, [
-    //   'data',
-    //   'isFetching',
-    //   'refetch',
-    //   'isLoading',
-    // ]),
-    calendarConfigs: INITIAL_CALENDAR_CONFIGS,
-    // calendarConfigs: calendarConfigs || INITIAL_CALENDAR_CONFIGS,
+    currentUserDataStaff: currentUserDataStaff,
+    currentBusiness: pick(currentBusinessReq, ['data', 'isLoading']),
+    currentUser: pick(currentUserReq, ['data', 'isLoading']),
+    calendarConfigs: calendarConfigs || INITIAL_CALENDAR_CONFIGS,
   };
   return (
     <MemoProvider {...data}>
@@ -109,15 +105,15 @@ export const AppProvider = ({ children }: React.PropsWithChildren) => {
   );
 };
 
-// type TCalendarConfigs = Required<
-//   Pick<
-//     TBusinessEntity,
-//     | 'calendar_interval'
-//     | 'calendar_slot_size'
-//     | 'calendar_day_start_at'
-//     | 'calendar_week_starts_on'
-//   >
-// >;
+type TCalendarConfigs = Required<
+  Pick<
+    TBusinessEntity,
+    | 'calendar_interval'
+    | 'calendar_slot_size'
+    | 'calendar_day_start_at'
+    | 'calendar_week_starts_on'
+  >
+>;
 
 interface TContextValues {
   // fUser:
@@ -126,14 +122,8 @@ interface TContextValues {
   //       'email' | 'phoneNumber' | 'photoURL' | 'displayName' | 'providerData'
   //     >
   //   | undefined;
-  // currentBusiness: Pick<
-  //   UseQueryResult<TBusinessEntity | undefined, any>,
-  //   'data' | 'isFetching' | 'refetch' | 'isLoading' | 'error'
-  // >;
-  // currentUser: Pick<
-  //   UseQueryResult<TUserEntity | undefined, any>,
-  //   'data' | 'isFetching' | 'refetch' | 'isLoading'
-  // >;
-  // currentUserDataStaff: TStaffEntity;
-  calendarConfigs: any;
+  currentBusiness: Partial<SWRResponse<TBusinessEntity>>;
+  currentUser: Partial<SWRResponse<TUserEntity>>;
+  currentUserDataStaff: TStaffEntity;
+  calendarConfigs: TCalendarConfigs;
 }

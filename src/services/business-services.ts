@@ -20,18 +20,18 @@ export const ApiBusiness: TApiBusiness = {
     return await api.post(endpoint, payload);
   },
 
-  async update(id, payload) {
-    const endpoint = `/businesses/${id}/`;
+  async update(params, payload) {
+    const endpoint = `/businesses/${params?.id}/`;
     return await api.put(endpoint, payload);
   },
 
-  async updatePartial(id, payload, options?: AxiosRequestConfig<any>) {
-    const endpoint = `/businesses/${id}/`;
+  async updatePartial(params, payload, options?: AxiosRequestConfig<any>) {
+    const endpoint = `/businesses/${params?.id}/`;
     return await api.patch(endpoint, payload, options);
   },
 
   async delete(payload) {
-    const endpoint = `/businesses/${payload}/`;
+    const endpoint = `/businesses/${payload?.id}/`;
     return await api.delete(endpoint);
   },
 
@@ -100,13 +100,16 @@ export interface TApiBusiness {
   findAll(): Promise<TBusinessEntity[]>;
   findById(payload: string): Promise<TBusinessEntity>;
   create(payload: TCreateBusinessPayload): Promise<any>;
-  update(id: string, payload: TUpdateBusinessPayload): Promise<any>;
+  update(
+    params: TFindBusinessParams,
+    payload: TUpdateBusinessPayload,
+  ): Promise<any>;
   updatePartial(
-    id: string,
+    params: TFindBusinessParams,
     payload: TUpdateBusinessPayload,
     options?: any,
   ): Promise<any>;
-  delete(payload: string): Promise<any>;
+  delete(params: TFindBusinessParams): Promise<any>;
 
   // Subscription & Billing operations
   findPlans(payload?: any): Promise<TBusinessSubscriptionPlanEntity[]>;
@@ -137,11 +140,21 @@ export interface TApiBusiness {
   deleteGallery(params?: TFindGalleryBusinessPayload): Promise<any>;
 }
 
-// ==================== BUSINESS PAYLOADS ====================
+// ==================== BUSINESS PARAMS ====================
 
-export interface TFindBusinessPayload {
+export interface TFindBusinessParams {
   id?: string;
 }
+
+// ==================== BUSINESS HOURS ====================
+
+export interface TBusinessHour {
+  is_working: boolean;
+  from: string | null;
+  to: string | null;
+}
+
+export type TBusinessHours = Record<string, TBusinessHour>;
 
 export interface TCreateBusinessPayload {
   owner_name?: string;
@@ -215,16 +228,6 @@ export interface TCreateBusinessPayload {
 }
 
 export interface TUpdateBusinessPayload extends TCreateBusinessPayload {}
-
-// ==================== BUSINESS HOURS ====================
-
-export interface TBusinessHour {
-  is_working: boolean;
-  from: string | null;
-  to: string | null;
-}
-
-export type TBusinessHours = Record<string, TBusinessHour>;
 
 // ==================== SUBSCRIPTION & PLANS ====================
 

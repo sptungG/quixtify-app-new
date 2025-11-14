@@ -1,6 +1,6 @@
-import { memoryStorage } from '@/utils/utils-instorage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { MemoryStorage } from './../utils/utils-instorage';
 
 export interface AppState {
   lang: string;
@@ -54,7 +54,7 @@ export const defaultInitState: AppState = {
 
 const isBrowser =
   typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
-const storageProvider = () => (isBrowser ? localStorage : memoryStorage);
+const storageProvider = () => (isBrowser ? localStorage : new MemoryStorage());
 
 export const useAppStore = create<AppStore>()(
   persist(
