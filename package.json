@@ -18,7 +18,9 @@
     "node": ">=16.18.1"
   },
   "lint-staged": {
-    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}": ["biome check"]
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}": [
+      "biome check"
+    ]
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
@@ -79,6 +81,7 @@
     "rimraf": "^6.0.1",
     "simple-git-hooks": "^2.11.1",
     "tailwindcss": "^4.1.17",
+    "tailwindcss-animated": "^2.0.0",
     "typescript": "~5.7.3"
   }
 }

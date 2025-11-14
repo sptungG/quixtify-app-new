@@ -25,6 +25,18 @@ const config: Config = {
         'safe-l': 'env(safe-area-inset-left, 0px)',
         'safe-r': 'env(safe-area-inset-right, 0px)',
       },
+      keyframe: {
+        bounceY: {
+          '0%, 100%': {
+            transform: 'translateY(-33%)',
+            'animation-timing-function': 'cubic-bezier(0.8,0,1,1)',
+          },
+          '50%': {
+            transform: 'none',
+            'animation-timing-function': 'cubic-bezier(0,0,0.2,1)',
+          },
+        },
+      },
     },
   },
   plugins: [],

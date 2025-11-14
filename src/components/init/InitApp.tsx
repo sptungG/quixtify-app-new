@@ -7,7 +7,7 @@ const InitApp = ({ children }: TInitAppProps) => {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(() => {
       // setSession(session);
     });
     return () => subscription.unsubscribe();

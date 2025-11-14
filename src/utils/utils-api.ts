@@ -6,7 +6,7 @@ import { supabase } from './utils-supabase';
 
 // ==================== GET AUTH CONTEXT ====================
 
-async function getAuthContext() {
+export async function getAuthContext() {
   const { data, error } = await supabase.auth.getSession();
 
   if (error || !data?.session) {
@@ -128,5 +128,3 @@ export const api = {
   delete: <T = any>(url: string, config?: AxiosRequestConfig<any>) =>
     apiRequest<T>(url, { method: 'DELETE', ...config }),
 };
-
-export { getAuthContext };
