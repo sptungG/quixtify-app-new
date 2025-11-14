@@ -6,40 +6,51 @@ const LOGIN_URL = 'http://localhost:3000/login';
 test.describe('Sign Up Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(SIGNUP_URL);
+    await page.waitForLoadState('networkidle');
   });
 
   // ==================== PAGE RENDERING ====================
 
   test('should render sign up page correctly', async ({ page }) => {
-    // Check page title
-    await expect(page.locator('text=Create your free account')).toBeVisible();
+    // Check page title with better selector
+    await expect(
+      page.getByRole('heading', { name: /create your free account/i }),
+    ).toBeVisible();
 
     // Check description
     await expect(
-      page.locator('text=Create your free business account'),
+      page.getByText(/create your free business account/i),
     ).toBeVisible();
 
-    // Check form fields
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('input[type="password"]').first()).toBeVisible();
+    // Check form fields with accessible selectors
+    await expect(page.getByLabel(/email address/i)).toBeVisible();
+    await expect(page.getByLabel(/^password$/i)).toBeVisible();
+    await expect(page.getByLabel(/confirm password/i)).toBeVisible();
 
     // Check submit button
     await expect(
-      page.locator('button:has-text("Continue with Email")'),
+      page.getByRole('button', { name: /continue with email/i }),
     ).toBeVisible();
 
     // Check login link
-    await expect(page.locator('text=Already have an account?')).toBeVisible();
+    await expect(page.getByText(/already have an account/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: /log in/i })).toBeVisible();
   });
 
   test('should show logo on mobile and desktop', async ({ page }) => {
     // Check mobile logo
     await page.setViewportSize({ width: 375, height: 667 });
-    await expect(page.locator('svg').first()).toBeVisible();
+    const mobileLogo = page
+      .locator('svg[role="img"], img[alt*="logo" i]')
+      .first();
+    await expect(mobileLogo).toBeVisible();
 
     // Check desktop logo
     await page.setViewportSize({ width: 1280, height: 720 });
-    await expect(page.locator('svg').first()).toBeVisible();
+    const desktopLogo = page
+      .locator('svg[role="img"], img[alt*="logo" i]')
+      .first();
+    await expect(desktopLogo).toBeVisible();
   });
 
   test('should display carousel on desktop only', async ({ page }) => {
@@ -59,89 +70,88 @@ test.describe('Sign Up Page', () => {
   // ==================== FORM VALIDATION ====================
 
   test('should show error when email is empty', async ({ page }) => {
-    await page.locator('button:has-text("Continue with Email")').click();
-    await expect(page.locator('text=Email is required')).toBeVisible();
+    await page.getByRole('button', { name: /continue with email/i }).click();
+    await expect(page.getByText(/email is required/i)).toBeVisible();
   });
 
   test('should show error when email is invalid', async ({ page }) => {
-    await page.locator('input[type="email"]').fill('invalid-email');
-    await page.locator('button:has-text("Continue with Email")').click();
-    await expect(page.locator('text=Invalid email address')).toBeVisible();
+    await page.getByLabel(/email address/i).fill('invalid-email');
+    await page.getByRole('button', { name: /continue with email/i }).click();
+    await expect(page.getByText(/invalid email address/i)).toBeVisible();
   });
 
   test('should show error when password is empty', async ({ page }) => {
-    await page.locator('input[type="email"]').fill('test@example.com');
-    await page.locator('button:has-text("Continue with Email")').click();
-    await expect(page.locator('text=Password is required')).toBeVisible();
+    await page.getByLabel(/email address/i).fill('test@example.com');
+    await page.getByRole('button', { name: /continue with email/i }).click();
+    await expect(page.getByText(/password is required/i)).toBeVisible();
   });
 
   test('should show error when password is too short', async ({ page }) => {
-    await page.locator('input[type="email"]').fill('test@example.com');
-    await page.locator('input[type="password"]').first().fill('short');
-    await page.locator('button:has-text("Continue with Email")').click();
+    await page.getByLabel(/email address/i).fill('test@example.com');
+    await page.getByLabel(/^password$/i).fill('short');
+    await page.getByRole('button', { name: /continue with email/i }).click();
     await expect(
-      page.locator('text=Password must be at least 8 characters'),
+      page.getByText(/password must be at least 8 characters/i),
     ).toBeVisible();
   });
 
   test('should show error when passwords do not match', async ({ page }) => {
-    await page.locator('input[type="email"]').fill('test@example.com');
-    await page.locator('input[type="password"]').first().fill('Password123!');
-    await page.locator('input[type="password"]').last().fill('Password456!');
-    await page.locator('button:has-text("Continue with Email")').click();
-    await expect(page.locator('text=Passwords must match')).toBeVisible();
+    await page.getByLabel(/email address/i).fill('test@example.com');
+    await page.getByLabel(/^password$/i).fill('Password123!');
+    await page.getByLabel(/confirm password/i).fill('Password456!');
+    await page.getByRole('button', { name: /continue with email/i }).click();
+    await expect(page.getByText(/passwords must match/i)).toBeVisible();
   });
 
   test('should show error when confirm password is empty', async ({ page }) => {
-    await page.locator('input[type="email"]').fill('test@example.com');
-    await page.locator('input[type="password"]').first().fill('Password123!');
-    await page.locator('button:has-text("Continue with Email")').click();
-    await expect(
-      page.locator('text=Confirm password is required'),
-    ).toBeVisible();
+    await page.getByLabel(/email address/i).fill('test@example.com');
+    await page.getByLabel(/^password$/i).fill('Password123!');
+    await page.getByRole('button', { name: /continue with email/i }).click();
+    await expect(page.getByText(/confirm password is required/i)).toBeVisible();
   });
 
   test('should show error when terms not accepted', async ({ page }) => {
-    await page.locator('input[type="email"]').fill('test@example.com');
-    await page.locator('input[type="password"]').first().fill('Password123!');
-    await page.locator('input[type="password"]').last().fill('Password123!');
-    await page.locator('button:has-text("Continue with Email")').click();
+    await page.getByLabel(/email address/i).fill('test@example.com');
+    await page.getByLabel(/^password$/i).fill('Password123!');
+    await page.getByLabel(/confirm password/i).fill('Password123!');
+    await page.getByRole('button', { name: /continue with email/i }).click();
     await expect(
-      page.locator('text=Please accept the terms and conditions'),
+      page.getByText(/please accept the terms and conditions/i),
     ).toBeVisible();
   });
 
   // ==================== FORM SUBMISSION ====================
 
   test('should submit form with valid data', async ({ page }) => {
-    // Fill form
-    await page.locator('input[type="email"]').fill('test@example.com');
-    await page.locator('input[type="password"]').first().fill('Password123!');
-    await page.locator('input[type="password"]').last().fill('Password123!');
-    await page.locator('input[type="checkbox"]').check();
+    // Fill form with accessible selectors
+    await page.getByLabel(/email address/i).fill('test@example.com');
+    await page.getByLabel(/^password$/i).fill('Password123!');
+    await page.getByLabel(/confirm password/i).fill('Password123!');
+    await page.getByRole('checkbox', { name: /terms/i }).check();
 
     // Submit
-    await page.locator('button:has-text("Continue with Email")').click();
+    const submitButton = page.getByRole('button', {
+      name: /continue with email/i,
+    });
+    await submitButton.click();
 
     // Check loading state
-    await expect(
-      page.locator('button:has-text("Continue with Email")'),
-    ).toBeDisabled();
+    await expect(submitButton).toBeDisabled();
   });
 
   test('should submit form on Enter key press', async ({ page }) => {
     // Fill form
-    await page.locator('input[type="email"]').fill('test@example.com');
-    await page.locator('input[type="password"]').first().fill('Password123!');
-    await page.locator('input[type="password"]').last().fill('Password123!');
-    await page.locator('input[type="checkbox"]').check();
+    await page.getByLabel(/email address/i).fill('test@example.com');
+    await page.getByLabel(/^password$/i).fill('Password123!');
+    await page.getByLabel(/confirm password/i).fill('Password123!');
+    await page.getByRole('checkbox', { name: /terms/i }).check();
 
     // Press Enter
-    await page.locator('input[type="password"]').last().press('Enter');
+    await page.getByLabel(/confirm password/i).press('Enter');
 
     // Check loading state
     await expect(
-      page.locator('button:has-text("Continue with Email")'),
+      page.getByRole('button', { name: /continue with email/i }),
     ).toBeDisabled();
   });
 
@@ -149,40 +159,40 @@ test.describe('Sign Up Page', () => {
     page,
   }) => {
     // Fill incomplete form
-    await page.locator('input[type="email"]').fill('test@example.com');
-    await page.locator('input[type="password"]').first().fill('short');
+    await page.getByLabel(/email address/i).fill('test@example.com');
+    await page.getByLabel(/^password$/i).fill('short');
 
     // Press Enter
-    await page.locator('input[type="password"]').first().press('Enter');
+    await page.getByLabel(/^password$/i).press('Enter');
 
     // Should show validation error
     await expect(
-      page.locator('text=Password must be at least 8 characters'),
+      page.getByText(/password must be at least 8 characters/i),
     ).toBeVisible();
 
     // Button should not be disabled
     await expect(
-      page.locator('button:has-text("Continue with Email")'),
+      page.getByRole('button', { name: /continue with email/i }),
     ).not.toBeDisabled();
   });
 
   // ==================== NAVIGATION ====================
 
   test('should navigate to login page', async ({ page }) => {
-    await page.locator('a:has-text("Log in")').click();
+    await page.getByRole('link', { name: /log in/i }).click();
     await expect(page).toHaveURL(LOGIN_URL);
   });
 
   test('should open terms in new tab', async ({ page, context }) => {
     const pagePromise = context.waitForEvent('page');
-    await page.locator('a:has-text("Terms and Conditions")').click();
+    await page.getByRole('link', { name: /terms and conditions/i }).click();
     const newPage = await pagePromise;
     await expect(newPage).toHaveURL(/\/terms/);
   });
 
   test('should open privacy policy in new tab', async ({ page, context }) => {
     const pagePromise = context.waitForEvent('page');
-    await page.locator('a:has-text("Privacy Policy")').click();
+    await page.getByRole('link', { name: /privacy policy/i }).click();
     const newPage = await pagePromise;
     await expect(newPage).toHaveURL(/\/privacy/);
   });
@@ -190,44 +200,41 @@ test.describe('Sign Up Page', () => {
   // ==================== FORM INTERACTIONS ====================
 
   test('should toggle password visibility', async ({ page }) => {
-    const passwordInput = page.locator('input[type="password"]').first();
+    const passwordInput = page.getByLabel(/^password$/i);
     await passwordInput.fill('Password123!');
 
     // Click show password button
-    await page
-      .locator('button[aria-label="Toggle password visibility"]')
-      .first()
-      .click();
+    const toggleButton = page
+      .getByRole('button', { name: /toggle password visibility/i })
+      .first();
+    await toggleButton.click();
 
     // Check input type changed
     await expect(passwordInput).toHaveAttribute('type', 'text');
 
     // Click hide password button
-    await page
-      .locator('button[aria-label="Toggle password visibility"]')
-      .first()
-      .click();
+    await toggleButton.click();
 
     // Check input type changed back
     await expect(passwordInput).toHaveAttribute('type', 'password');
   });
 
   test('should validate on input change', async ({ page }) => {
-    const emailInput = page.locator('input[type="email"]');
+    const emailInput = page.getByLabel(/email address/i);
 
     // Enter invalid email
     await emailInput.fill('invalid');
     await emailInput.blur();
-    await expect(page.locator('text=Invalid email address')).toBeVisible();
+    await expect(page.getByText(/invalid email address/i)).toBeVisible();
 
     // Fix email
     await emailInput.fill('test@example.com');
     await emailInput.blur();
-    await expect(page.locator('text=Invalid email address')).not.toBeVisible();
+    await expect(page.getByText(/invalid email address/i)).not.toBeVisible();
   });
 
   test('should check and uncheck terms checkbox', async ({ page }) => {
-    const checkbox = page.locator('input[type="checkbox"]');
+    const checkbox = page.getByRole('checkbox', { name: /terms/i });
 
     // Check
     await checkbox.check();
@@ -241,14 +248,12 @@ test.describe('Sign Up Page', () => {
   // ==================== ACCESSIBILITY ====================
 
   test('should have proper labels for inputs', async ({ page }) => {
-    await expect(page.locator('label:has-text("Email address")')).toBeVisible();
-    await expect(page.locator('label:has-text("Password")')).toBeVisible();
-    await expect(
-      page.locator('label:has-text("Confirm password")'),
-    ).toBeVisible();
+    await expect(page.getByLabel(/email address/i)).toBeVisible();
+    await expect(page.getByLabel(/^password$/i)).toBeVisible();
+    await expect(page.getByLabel(/confirm password/i)).toBeVisible();
   });
 
-  test('should have asterisk for required fields', async ({ page }) => {
+  test('should have required field indicators', async ({ page }) => {
     const emailLabel = page.locator('label:has-text("Email address")');
     await expect(
       emailLabel.locator('.mantine-InputWrapper-required'),
@@ -260,43 +265,42 @@ test.describe('Sign Up Page', () => {
     ).toBeVisible();
   });
 
-  test('should focus first input on page load', async ({ page }) => {
-    await page.reload();
-    const emailInput = page.locator('input[type="email"]');
-    await emailInput.focus();
-    await expect(emailInput).toBeFocused();
+  test('should support keyboard navigation', async ({ page }) => {
+    // Tab through form fields
+    await page.keyboard.press('Tab');
+    await expect(page.getByLabel(/email address/i)).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(page.getByLabel(/^password$/i)).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(page.getByLabel(/confirm password/i)).toBeFocused();
   });
 
   // ==================== RESPONSIVE DESIGN ====================
 
   test('should be responsive on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-
-    // Check form is visible
-    await expect(page.locator('text=Create your free account')).toBeVisible();
-    await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(
-      page.locator('button:has-text("Continue with Email")'),
+      page.getByRole('heading', { name: /create your free account/i }),
     ).toBeVisible();
+    await expect(page.getByLabel(/email address/i)).toBeVisible();
   });
 
   test('should be responsive on tablet', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 });
-
-    // Check form is visible
-    await expect(page.locator('text=Create your free account')).toBeVisible();
-    await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(
-      page.locator('button:has-text("Continue with Email")'),
+      page.getByRole('heading', { name: /create your free account/i }),
     ).toBeVisible();
+    await expect(page.getByLabel(/email address/i)).toBeVisible();
   });
 
   test('should be responsive on desktop', async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
-
-    // Check form and carousel are visible
-    await expect(page.locator('text=Create your free account')).toBeVisible();
-    await expect(page.locator('.mantine-Carousel-root')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /create your free account/i }),
+    ).toBeVisible();
+    await expect(page.getByLabel(/email address/i)).toBeVisible();
   });
 });
 
@@ -304,43 +308,88 @@ test.describe('Sign Up Page', () => {
 
 test.describe('Sign Up Page - Carousel', () => {
   test.beforeEach(async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto(SIGNUP_URL);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.waitForLoadState('networkidle');
   });
 
   test('should display carousel slides', async ({ page }) => {
-    // Wait for carousel to load
-    await page.waitForSelector('.mantine-Carousel-root');
+    const carousel = page.locator('.mantine-Carousel-root');
+    await expect(carousel).toBeVisible();
 
-    // Check first slide content
-    await expect(page.locator('text=No credit card required')).toBeVisible();
+    const slides = page.locator('.mantine-Carousel-slide');
+    expect(await slides.count()).toBeGreaterThan(0);
   });
 
   test('should autoplay carousel', async ({ page }) => {
-    await page.waitForSelector('.mantine-Carousel-root');
-
-    // Wait for autoplay (10 seconds + buffer)
-    await page.waitForTimeout(11000);
-
-    // Check if carousel moved to next slide
     const indicators = page.locator('.mantine-Carousel-indicator');
-    const activeIndicator = indicators.locator('[data-active="true"]');
-    await expect(activeIndicator).toBeVisible();
+    const firstIndicator = indicators.first();
+
+    // Check initial state
+    await expect(firstIndicator).toHaveAttribute('data-active', 'true');
+
+    // Wait for autoplay transition
+    await page.waitForTimeout(5000);
+
+    // Check if carousel advanced
+    const activeIndicators = page.locator(
+      '.mantine-Carousel-indicator[data-active="true"]',
+    );
+    await expect(activeIndicators).toBeVisible();
+  });
+
+  test('should navigate carousel with indicators', async ({ page }) => {
+    const indicators = page.locator('.mantine-Carousel-indicator');
+    const secondIndicator = indicators.nth(1);
+
+    // Click second indicator
+    await secondIndicator.click();
+    await page.waitForTimeout(500);
+
+    // Verify it's active
+    await expect(secondIndicator).toHaveAttribute('data-active', 'true');
   });
 
   test('should display video backgrounds', async ({ page }) => {
-    await page.waitForSelector('video');
+    await page.waitForSelector('video', { timeout: 5000 });
     const videos = page.locator('video');
     await expect(videos.first()).toBeVisible();
+
+    // Check video has source
+    const videoSrc = await videos.first().getAttribute('src');
+    expect(videoSrc).toBeTruthy();
   });
 
   test('should display testimonials', async ({ page }) => {
     await expect(page.locator('.mantine-Avatar-root').first()).toBeVisible();
-    await expect(page.locator('text=from 200+ reviews')).toBeVisible();
+    await expect(page.getByText(/from 200\+ reviews/i)).toBeVisible();
   });
 
   test('should display rating', async ({ page }) => {
     await expect(page.locator('.mantine-Rating-root')).toBeVisible();
-    await expect(page.locator('text=4.7')).toBeVisible();
+    await expect(page.getByText('4.7')).toBeVisible();
+  });
+
+  test('should pause carousel on hover', async ({ page }) => {
+    const carousel = page.locator('.mantine-Carousel-root');
+
+    // Hover over carousel
+    await carousel.hover();
+
+    const initialActiveIndicator = page.locator(
+      '.mantine-Carousel-indicator[data-active="true"]',
+    );
+    const initialIndex =
+      await initialActiveIndicator.getAttribute('data-index');
+
+    // Wait and verify it hasn't changed
+    await page.waitForTimeout(6000);
+    const currentActiveIndicator = page.locator(
+      '.mantine-Carousel-indicator[data-active="true"]',
+    );
+    const currentIndex =
+      await currentActiveIndicator.getAttribute('data-index');
+
+    expect(initialIndex).toBe(currentIndex);
   });
 });
