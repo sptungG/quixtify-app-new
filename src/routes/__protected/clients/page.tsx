@@ -10,7 +10,7 @@ const Page = ({}: TPageProps) => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+      <h1 className="text-3xl pb-safe-b-3 font-bold underline">Hello world!</h1>
       <Button className="font-sora">Hello</Button>
     </div>
   );

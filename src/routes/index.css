@@ -4,7 +4,42 @@
 
 @import "tailwind-preset-mantine";
 
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
 @theme {
   --font-sora: "Sora", sans-serif;
   --font-inter: "Inter", sans-serif;
+
+  /* Padding variants */
+  --spacing-safe-t: var(--safe-area-top);
+  --spacing-safe-b: var(--safe-area-bottom);
+  --spacing-safe-l: var(--safe-area-left);
+  --spacing-safe-r: var(--safe-area-right);
+  --spacing-safe-t-3: calc(var(--safe-area-top) + 0.75rem);
+  --spacing-safe-b-3: calc(var(--safe-area-bottom) + 0.75rem);
+  --spacing-safe-t-4: calc(var(--safe-area-top) + 1rem);
+  --spacing-safe-b-4: calc(var(--safe-area-bottom) + 1rem);
+
+  /* Height variants */
+  --height-safe-t: var(--safe-area-top);
+  --height-safe-b: var(--safe-area-bottom);
+  --height-safe-l: var(--safe-area-left);
+  --height-safe-r: var(--safe-area-right);
+
+  @keyframes bounceY {
+    0%,
+    100% {
+      transform: translateY(-33%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
 }
