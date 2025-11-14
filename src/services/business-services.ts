@@ -1,82 +1,95 @@
 import { api } from '@/utils/utils-api';
+import { AxiosRequestConfig } from 'axios';
+import { omit } from 'lodash';
 
 export const ApiBusiness: TApiBusiness = {
+  // ==================== BUSINESS CRUD ====================
+
   async findAll() {
-    return await api.get(`/businesses/`);
+    const endpoint = '/businesses/';
+    return await api.get(endpoint);
   },
+
   async findById(payload) {
-    return await api.get(`/businesses/${payload}/`);
+    const endpoint = `/businesses/${payload}/`;
+    return await api.get(endpoint);
   },
+
   async create(payload) {
-    return await api.post(`/businesses/`, payload);
+    const endpoint = '/businesses/';
+    return await api.post(endpoint, payload);
   },
+
   async update(id, payload) {
-    return await api.put(`/businesses/${id}/`, payload);
+    const endpoint = `/businesses/${id}/`;
+    return await api.put(endpoint, payload);
   },
-  async updatePartial(id, payload) {
-    return await api.patch(`/businesses/${id}/`, payload);
+
+  async updatePartial(id, payload, options?: AxiosRequestConfig<any>) {
+    const endpoint = `/businesses/${id}/`;
+    return await api.patch(endpoint, payload, options);
   },
+
   async delete(payload) {
-    return await api.delete(`/businesses/${payload}/`);
+    const endpoint = `/businesses/${payload}/`;
+    return await api.delete(endpoint);
   },
 
-  //
+  // ==================== PLANS & BILLING ====================
+
   async findPlans(params) {
-    return await api.get(`/plans/`, params);
+    const endpoint = '/plans/';
+    return await api.get(endpoint);
   },
+
   async getBillingPortal(payload) {
-    const { business, ...body } = payload;
-    return await api.post(
-      `/businesses/${business}/stripe/create-customer-portal-session/`,
-      body,
-    );
+    const endpoint = `businesses/${payload?.business}/stripe/create-customer-portal-session/`;
+    const data = omit(payload, ['business']);
+    return await api.post(endpoint, data);
   },
+
   async createCheckoutSession(payload) {
-    const { business, ...body } = payload;
-    return await api.post(
-      `/businesses/${business}/stripe/create-checkout-session/`,
-      body,
-    );
+    const endpoint = `businesses/${payload?.business}/stripe/create-checkout-session/`;
+    const data = omit(payload, ['business']);
+    return await api.post(endpoint, data);
   },
+
   async createCheckoutSmsSession(payload) {
-    const { business, ...body } = payload;
-    return await api.post(
-      `/businesses/${business}/sms-purchase/create-checkout-session/`,
-      body,
-    );
+    const endpoint = `businesses/${payload?.business}/sms-purchase/create-checkout-session/`;
+    const data = omit(payload, ['business']);
+    return await api.post(endpoint, data);
   },
+
   async downgradePlan(payload) {
-    const { business, ...body } = payload;
-    return await api.post(`/businesses/${business}/stripe/downgrade/`, body);
+    const endpoint = `businesses/${payload?.business}/stripe/downgrade/`;
+    const data = omit(payload, ['business']);
+    return await api.post(endpoint, data);
   },
 
-  //
-  async uploadGallery(params, payload) {
-    return await api.post(`/businesses/${params?.business}/gallery/`, payload);
+  // ==================== GALLERY ====================
+
+  async uploadGallery(params, payload, options?: AxiosRequestConfig<any>) {
+    const endpoint = `/businesses/${params?.business}/gallery/`;
+    return await api.post(endpoint, payload, options);
   },
+
   async findGallery(params?: TFindGalleryBusinessPayload) {
-    const { business, ...queryParams } = params || {};
-    const res = await api.get(`/businesses/${business}/gallery/`, queryParams);
-
-    if (res.status === 'error') return res;
-
-    return {
-      ...res,
-      data: ((res.data || []) as unknown as any[]).sort(
-        (a, b) => (a?.position || 0) - (b?.position || 0),
-      ),
-    } as any;
+    const endpoint = `/businesses/${params?.business}/gallery/`;
+    const queryParams = omit(params, ['business']);
+    const res = await api.get(endpoint, { params: queryParams });
+    return ((res || []) as unknown as any[]).sort(
+      (a, b) => (a?.position || 0) - (b?.position || 0),
+    ) as any;
   },
+
   async reorderGallery(params, payload) {
-    return await api.post(
-      `/businesses/${params?.business}/gallery/update-positions/`,
-      payload,
-    );
+    const endpoint = `/businesses/${params?.business}/gallery/update-positions/`;
+    return await api.post(endpoint, payload);
   },
+
   async deleteGallery(params) {
-    return await api.delete(
-      `/businesses/${params?.business}/gallery/${params?.id}/`,
-    );
+    const endpoint = `/businesses/${params?.business}/gallery/${params?.id}/`;
+    return await api.delete(endpoint);
   },
 };
 

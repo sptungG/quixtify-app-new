@@ -1,4 +1,4 @@
-interface TBaseFilter {
+export interface TBaseFilter {
   page?: number | null;
   page_size?: number | null;
   search?: string;
@@ -6,7 +6,7 @@ interface TBaseFilter {
 }
 
 // biome-ignore lint/complexity/noUselessTypeConstraint: <explanation>
-interface TResponse<TResult extends any> {
+export interface TResponse<TResult extends any> {
   results: TResult;
   previous?: string | null;
   next?: string | null;

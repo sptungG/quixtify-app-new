@@ -1,10 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
+import { get } from 'lodash';
 import queryString from 'query-string';
+import { getErrorMessage } from './utils-error';
 import { supabase } from './utils-supabase';
 
-// ==================== TYPES ====================
+// ==================== GET AUTH CONTEXT ====================
 
-export type ApiResponse<T = any> =
+export type TApiResponse<T = any> =
   | { status: 'success'; data: T; message?: string }
   | { status: 'error'; message: string; data: null };
 
@@ -13,10 +15,9 @@ type AuthContext = {
   apiUrl: string;
 };
 
-// ==================== GET AUTH CONTEXT ====================
-
 async function getAuthContext(): Promise<
-  { auth: AuthContext; error: null } | { auth: null; error: ApiResponse<never> }
+  | { auth: AuthContext; error: null }
+  | { auth: null; error: TApiResponse<never> }
 > {
   const {
     data: { session },
@@ -65,58 +66,33 @@ const createAxiosInstance = async (): Promise<AxiosInstance | null> => {
 
   const instance = axios.create({
     baseURL: auth.apiUrl,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${auth.accessToken}`,
-    },
-    paramsSerializer: {
-      serialize: params =>
-        queryString.stringify(params, {
-          skipNull: false,
-          skipEmptyString: true,
-        }),
-    },
     maxRedirects: 0,
     adapter: ['fetch', 'xhr', 'http'],
   });
+
+  instance.interceptors.request.use(
+    async config => {
+      try {
+        const headers = new Headers(config.headers);
+        if (auth?.accessToken)
+          headers.set('Authorization', `Bearer ${auth?.accessToken}`);
+        // Automatically set Content-Type for non-FormData bodies
+        if (config.data && !(config.data instanceof FormData)) {
+          headers.set('Content-Type', 'application/json');
+        }
+        return config;
+      } catch (error) {
+        console.log('interceptorReq error:', error);
+      }
+      return config;
+    },
+    error => Promise.reject(error),
+  );
 
   // Response interceptor for error handling
   instance.interceptors.response.use(
     response => response,
     async (error: AxiosError) => {
-      const originalRequest = error.config as AxiosRequestConfig & {
-        _retry?: boolean;
-      };
-
-      // Handle 401 - refresh session and retry
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-
-        try {
-          const {
-            data: { session },
-            error: refreshError,
-          } = await supabase.auth.refreshSession();
-
-          if (refreshError || !session) {
-            await supabase.auth.signOut();
-            window.location.href = '/login';
-            return Promise.reject(error);
-          }
-
-          // Update authorization header with new token
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
-          }
-
-          return instance(originalRequest);
-        } catch (refreshError) {
-          await supabase.auth.signOut();
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
-        }
-      }
-
       return Promise.reject(error);
     },
   );
@@ -124,12 +100,12 @@ const createAxiosInstance = async (): Promise<AxiosInstance | null> => {
   return instance;
 };
 
-// ==================== API REQUEST HELPER ====================
+// ==================== CONVENIENCE METHODS ====================
 
 async function apiRequest<T>(
   endpoint: string,
   config: AxiosRequestConfig = {},
-): Promise<any> {
+) {
   try {
     const axiosInstance = await createAxiosInstance();
 
@@ -143,31 +119,21 @@ async function apiRequest<T>(
 
     const response = await axiosInstance.request<any>({
       url: endpoint,
+      paramsSerializer: {
+        serialize: params =>
+          queryString.stringify(params, {
+            skipNull: false,
+            skipEmptyString: true,
+          }),
+      },
       ...config,
     });
 
-    return {
-      status: 'success',
-      data: response.data.data || response.data,
-    };
+    return (get(response.data, 'data') || response.data) as any;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        'An unexpected error occurred';
-
-      return {
-        status: 'error',
-        message,
-        data: null,
-      };
-    }
-
     return {
       status: 'error',
-      message:
-        error instanceof Error ? error.message : 'An unexpected error occurred',
+      message: getErrorMessage(error).message,
       data: null,
     };
   }
@@ -176,20 +142,20 @@ async function apiRequest<T>(
 // ==================== CONVENIENCE METHODS ====================
 
 export const api = {
-  get: <T = any>(endpoint: string, params?: Record<string, any>) =>
-    apiRequest<T>(endpoint, { method: 'GET', params }),
+  get: <T = any>(url: string, config?: AxiosRequestConfig<any>) =>
+    apiRequest<T>(url, { method: 'GET', ...config }),
 
-  post: <T = any>(endpoint: string, data?: any) =>
-    apiRequest<T>(endpoint, { method: 'POST', data }),
+  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig<any>) =>
+    apiRequest<T>(url, { method: 'POST', data, ...config }),
 
-  put: <T = any>(endpoint: string, data?: any) =>
-    apiRequest<T>(endpoint, { method: 'PUT', data }),
+  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig<any>) =>
+    apiRequest<T>(url, { method: 'PUT', data, ...config }),
 
-  patch: <T = any>(endpoint: string, data?: any) =>
-    apiRequest<T>(endpoint, { method: 'PATCH', data }),
+  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig<any>) =>
+    apiRequest<T>(url, { method: 'PATCH', data, ...config }),
 
-  delete: <T = any>(endpoint: string) =>
-    apiRequest<T>(endpoint, { method: 'DELETE' }),
+  delete: <T = any>(url: string, config?: AxiosRequestConfig<any>) =>
+    apiRequest<T>(url, { method: 'DELETE', ...config }),
 };
 
 export { getAuthContext };

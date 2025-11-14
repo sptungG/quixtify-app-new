@@ -1,31 +1,44 @@
 import { api } from '@/utils/utils-api';
+import { omit } from 'lodash';
+import { TResponse } from './common-type';
 
 // ==================== API IMPLEMENTATION ====================
 
 export const ApiClient: TApiClient = {
   async findPagination(params) {
-    const { business, ...queryParams } = params || {};
-    return await api.get(`/businesses/${business}/clients/`, queryParams);
+    const endpoint = `/businesses/${params?.business}/clients/`;
+    const queryParams = omit(params, ['business']);
+    return await api.get(endpoint, { params: queryParams });
   },
+
   async findById(params) {
-    const { business, id, ...queryParams } = params || {};
-    return await api.get(`/businesses/${business}/clients/${id}/`, queryParams);
+    const endpoint = `/businesses/${params?.business}/clients/${params?.id}/`;
+    const queryParams = omit(params, ['business', 'id']);
+    return await api.get(endpoint, { params: queryParams });
   },
+
   async create(params, payload) {
-    const { business, ...queryParams } = params || {};
-    return await api.post(`/businesses/${business}/clients/`, payload);
+    const endpoint = `/businesses/${params?.business}/clients/`;
+    const queryParams = omit(params, ['business']);
+    return await api.post(endpoint, payload, { params: queryParams });
   },
+
   async update(params, payload) {
-    const { business, id, ...queryParams } = params || {};
-    return await api.patch(`/businesses/${business}/clients/${id}/`, payload);
+    const endpoint = `/businesses/${params?.business}/clients/${params?.id}/`;
+    const queryParams = omit(params, ['business']);
+    return await api.patch(endpoint, payload, { params: queryParams });
   },
+
   async updatePartial(params, payload) {
-    const { business, id, ...queryParams } = params || {};
-    return await api.patch(`/businesses/${business}/clients/${id}/`, payload);
+    const endpoint = `/businesses/${params?.business}/clients/${params?.id}/`;
+    const queryParams = omit(params, ['business']);
+    return await api.patch(endpoint, payload, { params: queryParams });
   },
+
   async delete(params) {
-    const { business, id, ...queryParams } = params || {};
-    return await api.delete(`/businesses/${business}/clients/${id}/`);
+    const endpoint = `/businesses/${params?.business}/clients/${params?.id}/`;
+    const queryParams = omit(params, ['business']);
+    return await api.delete(endpoint, { params: queryParams });
   },
 };
 
