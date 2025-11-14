@@ -12,7 +12,7 @@ import { createContext, memo, useContext, useEffect, useMemo } from 'react';
 // import { TUserEntity } from '@/modules/users/types/user-type';
 
 import InitApp from '@/components/init/InitApp';
-import { useGetBusinessById, useGetCurrentUser } from '@/hooks/useSWRCombined';
+import { useGetBusinessById, useGetCurrentUser } from '@/hooks/useSWRServices';
 import {
   ApiUser,
   TBusinessEntity,
