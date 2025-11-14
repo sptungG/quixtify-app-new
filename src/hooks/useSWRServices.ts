@@ -31,6 +31,22 @@ import {
   createParamsMutationHook,
 } from './useSWRSet';
 
+// // GET hooks - call the function with parameters
+// const businessList = useGetBusinessList();
+// const business = useGetBusinessById('business-id');
+// const staffList = useGetStaffList({ business: 'business-id' });
+
+// // Mutation hooks - call to get the mutation hook
+// const { trigger: createBusiness } = useMutateCreateBusiness();
+// const { trigger: updateStaff } = useMutateUpdatePartialStaff();
+
+// // Use mutations
+// await createBusiness({ name: 'New Business' });
+// await updateStaff({
+//   params: { business: 'id', id: 'staff-id' },
+//   payload: { name: 'Updated' },
+// });
+
 // ==================== BUSINESS HOOKS (GET) ====================
 
 export const useGetBusinessList = () =>

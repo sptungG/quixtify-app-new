@@ -1,4 +1,5 @@
 import { Logo02Svg } from '@/components/icons/LogoSvg';
+import { useAppContext } from '@/contexts/AppContext';
 import useTranslation from '@/hooks/useTranslation';
 import { regexEmail } from '@/utils/utils';
 import { notifyError, notifySuccess } from '@/utils/utils-mantine';
@@ -26,6 +27,8 @@ type TLoginPageProps = { children?: React.ReactNode };
 const LoginPage = ({ children }: TLoginPageProps) => {
   const uid = useId();
   const { t } = useTranslation();
+  const { currentUser } = useAppContext();
+
   const [pageStatus, setPageStatus] = useState('');
   const navigate = useNavigate();
 
@@ -51,10 +54,10 @@ const LoginPage = ({ children }: TLoginPageProps) => {
         if (error) throw error;
 
         if (data.session) {
+          currentUser?.mutate?.();
           // setAt(data.session.access_token);
           methodForm.reset();
           notifySuccess({ title: t('Success'), message: t('Logged in') });
-          navigate('/');
         }
       } catch (error: any) {
         console.log('error:', error);

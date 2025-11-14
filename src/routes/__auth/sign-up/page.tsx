@@ -1,4 +1,5 @@
 import { LogoText01Svg } from '@/components/icons/LogoTextSvg';
+import { useAppContext } from '@/contexts/AppContext';
 import useTranslation from '@/hooks/useTranslation';
 import { IMAGE_PATHNAME } from '@/utils/constants';
 import { cn, regexEmail } from '@/utils/utils';
@@ -32,6 +33,8 @@ type TSignUpPageProps = { children?: React.ReactNode };
 const SignUpPage = ({ children }: TSignUpPageProps) => {
   const uid = useId();
   const { t } = useTranslation();
+  const { currentUser } = useAppContext();
+
   const [pageStatus, setPageStatus] = useState('');
 
   const navigate = useNavigate();
@@ -60,6 +63,7 @@ const SignUpPage = ({ children }: TSignUpPageProps) => {
         if (error) throw error;
 
         if (data.session) {
+          currentUser?.mutate?.();
           // setAt(data.session.access_token);
           methodForm.reset();
           notifySuccess({ title: t('Success'), message: t('Signed up') });

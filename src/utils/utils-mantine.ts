@@ -3,7 +3,7 @@ import { NotificationData, notifications } from '@mantine/notifications';
 // ==================== NOTIFICATION DEFAULTS ====================
 const NOTIFICATION_CONFIG = {
   position: 'top-center' as const,
-  autoClose: 5000,
+  autoClose: 2300,
   withCloseButton: true,
   withBorder: true,
 };

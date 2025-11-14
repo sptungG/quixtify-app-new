@@ -47,8 +47,6 @@ export const INITIAL_CALENDAR_CONFIGS = {
 // MAIN
 export const AppProvider = ({ children }: React.PropsWithChildren) => {
   const selectedStaff = useAppStoreHook(s => s.staff);
-  // const fUser0 = useAppStoreHook(s => s.fUser);
-  // const fUser = parsedFUser(fUser0) as any;
 
   const currentUserReq = useGetCurrentUser();
   const currentUserData = currentUserReq.data;
@@ -116,12 +114,6 @@ type TCalendarConfigs = Required<
 >;
 
 interface TContextValues {
-  // fUser:
-  //   | Pick<
-  //       User,
-  //       'email' | 'phoneNumber' | 'photoURL' | 'displayName' | 'providerData'
-  //     >
-  //   | undefined;
   currentBusiness: Partial<SWRResponse<TBusinessEntity>>;
   currentUser: Partial<SWRResponse<TUserEntity>>;
   currentUserDataStaff: TStaffEntity;

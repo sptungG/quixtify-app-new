@@ -11,13 +11,10 @@ import { LoadingScreen } from '../results/Loading';
 type TWithoutAuthLayoutProps = { children?: React.ReactNode };
 
 const WithoutAuthLayout = ({ children }: TWithoutAuthLayoutProps) => {
-  const GetAuthReq = useGetAuth();
   const { currentUser, currentUserDataStaff } = useAppContext();
   const currentUserData = currentUser.data;
 
   const { formatDateTz } = useDateTz({});
-
-  const at = GetAuthReq?.data?.data?.session.access_token;
 
   if (!currentUser.isLoading && !!currentUserData?.id) {
     if (!currentUserDataStaff?.id) return <Navigate to="/account-setup" />;
@@ -32,9 +29,7 @@ const WithoutAuthLayout = ({ children }: TWithoutAuthLayoutProps) => {
   return (
     <>
       {children}
-      {(currentUser.isLoading || at) && (
-        <LoadingScreen className="fixed inset-0" />
-      )}
+      {currentUser.isLoading && <LoadingScreen className="fixed inset-0" />}
     </>
   );
 };
